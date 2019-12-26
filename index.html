@@ -314,13 +314,18 @@ function createMap(data){
   function createPopUp(currentFeature) {
     var popUps = document.getElementsByClassName('mapboxgl-popup');
     if (popUps[0]) popUps[0].remove();
-
+    
+    if (currentFeature.properties.website !="" && currentFeature.properties.website != null){
+        website = '<h4><a href="https://'+currentFeature.properties.website+'" target="_blank">Visit website</a></h4>';
+    }else{
+        website = '<h4>No website currently available</h4>';
+    }
 
     var popup = new mapboxgl.Popup({closeOnClick: true})
           .setLngLat(currentFeature.geometry.coordinates)
           .setHTML('<h3>'+currentFeature.properties.company+'</h3>' +
             '<h4>' + currentFeature.properties.address+', '+currentFeature.properties.city+ ', '+ currentFeature.properties.state+ ", "+ currentFeature.properties.zip_code + '</h4>'+
-            '<h4><a href="'+currentFeature.properties.website+'" target="_blank">Visit website</a></h4>')
+            website)
           .addTo(map);
   }
       //function to sort list alphabetically
