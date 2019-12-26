@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta charset='utf-8' />
+      <title>Microbreweries</title>
+      <meta name='robots' content='noindex, nofollow'>
+      <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+      <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet'>
+      <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.1/mapbox-gl.js'></script>
+      <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.1/mapbox-gl.css' rel='stylesheet' />
+      <script src='https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.1.0/papaparse.min.js'></script>
+
+      <style>
+
+        body {
+          color:#404040;
+          font:400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+          margin:0;
+          padding:0;
+          -webkit-font-smoothing:antialiased;
+        }
+
+        * {
+          -webkit-box-sizing:border-box;
+          -moz-box-sizing:border-box;
+          box-sizing:border-box;
+        }
+
+        .sidebar {
+          position:absolute;
+          width:33.3333%;
+          height:100%;
+          top:0;left:0;
+          overflow:hidden;
+          border-right:1px solid rgba(0,0,0,0.25);
+        }
+        .pad2 {
+          padding:20px;
+        }
+
+        .map {
+          position:absolute;
+          left:33.3333%;
+          width:66.6666%;
+          top:0;bottom:0;
+        }
+
+        h1 {
+          font-size:22px;
+          margin:0;
+          font-weight:400;
+          line-height: 20px;
+          padding: 20px 2px;
+        }
+
+        a {
+          color:#1a7404;
+          text-decoration:none;
+        }
+
+        a:hover {
+          color:#050c33;
+        }
+
+        .heading {
+          background:#fff;
+          border-bottom:1px solid #eee;
+          min-height:60px;
+          line-height:60px;
+          padding:0 10px;
+          background-color: #00853e;
+          color: #fff;
+        }
+
+        .listings {
+          height:100%;
+          overflow:auto;
+          padding-bottom:60px;
+        }
+
+        .listings .item {
+          display:block;
+          border-bottom:1px solid #eee;
+          padding:10px;
+          text-decoration:none;
+        }
+
+        .listings .item:last-child { border-bottom:none; }
+        .listings .item .title {
+          display:block;
+          color:#00853e;
+          font-weight:700;
+        }
+
+        .listings .item .title small { font-weight:400; }
+        .listings .item.active .title,
+        .listings .item .title:hover { color:#8cc63f; }
+        .listings .item.active {
+          background-color:#f8f8f8;
+        }
+        ::-webkit-scrollbar {
+          width:3px;
+          height:3px;
+          border-left:0;
+          background:rgba(0,0,0,0.1);
+        }
+        ::-webkit-scrollbar-track {
+          background:none;
+        }
+        ::-webkit-scrollbar-thumb {
+          background:#00853e;
+          border-radius:0;
+        }
+
+
+        .clearfix { display:block; }
+        .clearfix:after {
+          content:'.';
+          display:block;
+          height:0;
+          clear:both;
+          visibility:hidden;
+        }
+
+        /* Marker tweaks */
+        .mapboxgl-popup {
+          padding-bottom: 10px;
+        }
+
+       
+        .mapboxgl-popup-content {
+          font:400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+          padding:0;
+          width:195px;
+        }
+        .mapboxgl-popup-content-wrapper {
+          padding:1%;
+        }
+        .mapboxgl-popup-content h3 {
+          background:#91c949;
+          color:#fff;
+          margin:0;
+          display:block;
+          padding:10px;
+          border-radius:3px 3px 0 0;
+          font-weight:700;
+          margin-top:-15px;
+        }
+
+        .mapboxgl-popup-content h4 {
+          margin:0;
+          display:block;
+          padding: 10px 10px 10px 10px;
+          font-weight:400;
+        }
+
+        .mapboxgl-popup-content div {
+          padding:10px;
+        }
+
+        .mapboxgl-container .leaflet-marker-icon {
+          cursor:pointer;
+        }
+
+        .mapboxgl-popup-anchor-top > .mapboxgl-popup-content {
+          margin-top: 3px;
+        }
+
+        .mapboxgl-popup-anchor-top > .mapboxgl-popup-tip {
+          border-bottom-color: #91c949;
+        }
+      </style>
+  </head>
+
+  <body>
+    <div class='sidebar'>
+      <div class='heading'>
+        <h1>Our locations</h1>
+      </div>
+    <div id='listings' class='listings'></div>
+    </div>
+    <div id='map' class='map'> </div>
+
+  <script>
+  // This will let you use the .remove() function later on
+  if (!('remove' in Element.prototype)) {
+    Element.prototype.remove = function() {
+      if (this.parentNode) {
+          this.parentNode.removeChild(this);
+      }
+    };
+  }
+
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYzEzc2xhbSIsImEiOiJjaWh2MjBjenEwMXdndHNraGgxYnFrMXVyIn0.EnDtV7OFvEYku7--ecPDJg';
+
+  // This adds the map
+  var map = new mapboxgl.Map({
+    // container id specified in the HTML
+    container: 'map',
+    // style URL
+    style: 'mapbox://styles/c13slam/ck44oeh1w04lk1cp5g2n5r01t',
+    // initial position in [long, lat] format
+    center: [-100.034084142948, 41.909671288923],
+    // initial zoom
+    zoom: 3,
+    scrollZoom: true
+  });
+  var feat=[];
+
+  Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vRrZnllTiVGWFmzzvEXLxAt5boQZZh3krmLbwkTwYT6rmVB_b6ntjmaiI6E2RmsVgzMUFLYbAv5GTaA/pub?output=csv", 
+    {download: true,
+    header: true,
+    complete: function(results) {
+            var data = results;
+            createMap(data.data);
+        }
+    });
+
+function createMap(data){
+    //save string of features for geojson
+    for (i=0; i<data.length; i++){
+        feat.push({type: 'Feature', properties: data[i], geometry: { type: 'Point', coordinates: [data[i].lon, data[i].lat]}});
+        //console.log(feat);
+    };
+    var geojson = {
+    type: 'FeatureCollection',
+    features: feat
+    };
+    //console.log(geojson);
+    // This adds the data to the map
+    map.on('load', function (e) {
+        var lats = [];
+        var longs = [];
+        
+        /* map.addSource('breweries', {
+            'type': 'geojson',
+            'data': geojson
+        }); */
+        map.addLayer({
+            'id': 'breweries_layer',
+            'type': 'symbol',
+            'source': {
+                'type': 'geojson',
+                'data': geojson
+            },
+            'layout': {
+                'icon-image': 'beer-15',
+                'icon-size': 0.7
+                }
+            
+        });
+        buildLocationList(geojson.features.sort(compareValues('company')));
+        //console.log(map.getSource('composite').vectorLayerIds)
+    /*     breweries.forEach(function(feature){
+            console.log(feature);
+            lats.push(parseFloat(feature.geometry.coordinates[1]));
+            longs.push(parseFloat(feature.geometry.coordinates[0]));
+        });
+        var maxLat = Math.max.apply(null,lats);
+        var maxLon = Math.max.apply(null,longs);
+        var minLat = Math.min.apply(null,lats);
+        var minLon = Math.min.apply(null,longs);
+        console.log(maxLat);
+        var bounds = new mapboxgl.LngLatBounds([[minLon, minLat],[maxLon, maxLat]]);
+
+        map.fitBounds(bounds);   */
+        
+        map.on('moveend', function() {
+            var features = map.queryRenderedFeatures({ layers: ['breweries_layer'] });
+            if (features) {
+            //var uniqueFeatures = getUniqueFeatures(features, 'iata_code');
+            // Populate features for the listing overlay.
+            buildLocationList(features.sort(compareValues('company')));
+            }
+        });
+
+
+
+    });
+}
+    map.on('mouseenter', 'breweries_layer', () => {
+        map.getCanvas().style.cursor = 'pointer'
+    });
+    map.on('mouseleave', 'breweries_layer', () => {
+     map.getCanvas().style.cursor = ''
+    });
+
+  map.on('click', 'breweries_layer', function(e){
+        // 1. Fly to the point
+        flyToStore(e.features[0]);
+
+        // 2. Close all other popups and display popup for clicked store
+        createPopUp(e.features[0]);
+
+        // 3. Highlight listing in sidebar (and remove highlight for all other listings)
+        var activeItem = document.getElementsByClassName('active');
+
+        //e.stopPropagation();
+        if (activeItem[0]) {
+           activeItem[0].classList.remove('active');
+        }
+
+        var listing = document.getElementById('listing-' + i);
+        listing.classList.add('active');
+  });
+
+  function flyToStore(currentFeature) {
+    map.flyTo({
+        center: currentFeature.geometry.coordinates,
+        zoom: 9
+      });
+  }
+
+  function createPopUp(currentFeature) {
+    var popUps = document.getElementsByClassName('mapboxgl-popup');
+    if (popUps[0]) popUps[0].remove();
+
+
+    var popup = new mapboxgl.Popup({closeOnClick: true})
+          .setLngLat(currentFeature.geometry.coordinates)
+          .setHTML('<h3>'+currentFeature.properties.company+'</h3>' +
+            '<h4>' + currentFeature.properties.address+', '+currentFeature.properties.city+ ', '+ currentFeature.properties.state+ ", "+ currentFeature.properties.zip_code + '</h4>'+
+            '<h4><a href="'+currentFeature.properties.website+'" target="_blank">Visit website</a></h4>')
+          .addTo(map);
+  }
+      //function to sort list alphabetically
+
+function compareValues(key, order = 'asc') {
+    return function innerSort(a, b) {
+        if (!a.properties.hasOwnProperty(key) || !b.properties.hasOwnProperty(key)) {
+        // property doesn't exist on either object
+        return 0;
+        }
+
+        const varA = (typeof a.properties[key] === 'string')
+        ? a.properties[key].toUpperCase() : a.properties[key];
+        const varB = (typeof b[key] === 'string')
+        ? b.properties[key].toUpperCase() : b.properties[key];
+
+        let comparison = 0;
+        if (varA > varB) {
+        comparison = 1;
+        } else if (varA < varB) {
+        comparison = -1;
+        }
+        return (
+        (order === 'desc') ? (comparison * -1) : comparison
+        );
+    };
+}
+
+  function buildLocationList(features) {
+    var listings = document.getElementById('listings');
+    listings.innerHTML='';
+    for (i = 0; i < features.length; i++) {
+      var currentFeature = features[i];
+      var prop = currentFeature.properties;
+
+      
+      var listing = listings.appendChild(document.createElement('div'));
+      listing.className = 'item';
+      listing.id = "listing-" + i;
+
+      var link = listing.appendChild(document.createElement('a'));
+      link.href = '#';
+      link.className = 'title';
+      link.dataPosition = i;
+      link.innerHTML = prop.company;
+
+      var details = listing.appendChild(document.createElement('div'));
+      details.innerHTML = prop.address+', '+prop.city+ ', '+ prop.state+ ", "+ prop.zip_code;
+     
+
+
+
+      link.addEventListener('click', function(e){
+        // Update the currentFeature to the store associated with the clicked link
+        var clickedListing = features[this.dataPosition];
+
+        // 1. Fly to the point
+        flyToStore(clickedListing);
+
+        // 2. Close all other popups and display popup for clicked store
+        createPopUp(clickedListing);
+
+        // 3. Highlight listing in sidebar (and remove highlight for all other listings)
+        var activeItem = document.getElementsByClassName('active');
+
+        if (activeItem[0]) {
+           activeItem[0].classList.remove('active');
+        }
+        this.parentNode.classList.add('active');
+
+      });
+        
+    }
+    
+  }
+
+
+    </script>
+  </body>
+</html>
