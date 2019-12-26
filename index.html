@@ -245,7 +245,8 @@ function createMap(data){
             },
             'layout': {
                 'icon-image': 'beer-15',
-                'icon-size': 0.7
+                'icon-size': 0.7,
+                "icon-allow-overlap": false
                 }
             
         });
@@ -266,6 +267,11 @@ function createMap(data){
         map.fitBounds(bounds);   */
         
         map.on('moveend', function() {
+            if (map.getZoom()>6){
+                map.setLayoutProperty('breweries_layer', "icon-allow-overlap", true);
+            }else{
+                map.setLayoutProperty('breweries_layer', "icon-allow-overlap", false);
+            }
             var features = map.queryRenderedFeatures({ layers: ['breweries_layer'] });
             if (features) {
             //var uniqueFeatures = getUniqueFeatures(features, 'iata_code');
