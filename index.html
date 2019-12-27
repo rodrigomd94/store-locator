@@ -9,6 +9,7 @@
       <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.1/mapbox-gl.js'></script>
       <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.1/mapbox-gl.css' rel='stylesheet' />
       <script src='https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.1.0/papaparse.min.js'></script>
+      <script src='https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.4.6/fuse.min.js'></script>
 
       <style>
 
@@ -175,7 +176,9 @@
   <body>
     <div class='sidebar'>
       <div class='heading'>
-        <h1>Our locations</h1>
+        <h1 style="padding-bottom: 0px">Our locations</h1>
+        <input type="text" id="search" placeholder="Search..">
+        <button type="button" id="search_button">Search</button>
       </div>
     <div id='listings' class='listings'></div>
     </div>
@@ -252,6 +255,13 @@ function createMap(data){
         });
         buildLocationList(geojson.features.sort(compareValues('company')));
 
+  //-----------function called when click search button
+        document.getElementById('search').addEventListener('change', (e)=>{
+          buildLocationList(getPointsInView(geojson.features));
+        });
+        document.getElementById('search_button').addEventListener('click', (e)=>{
+          buildLocationList(getPointsInView(geojson.features));
+        })
   ///-------function called when zomming or panning      
         map.on('moveend', function() {
             if (map.getZoom()>8.5){
@@ -267,6 +277,8 @@ function createMap(data){
             }
         });
     });
+
+   
 }
     map.on('mouseenter', 'breweries_layer', () => {
         map.getCanvas().style.cursor = 'pointer'
@@ -357,6 +369,14 @@ function compareValues(key, order = 'asc') {
 }
 
   function buildLocationList(features) {
+    var options = {
+      keys:['properties.company','properties.address', 'properties.city']
+    }
+    var fuse = new Fuse(features, options);
+    if (document.getElementById('search').value != ''){
+      features = fuse.search(document.getElementById('search').value).sort(compareValues('company'));
+    }
+
     var listings = document.getElementById('listings');
     listings.innerHTML='';
     for (i = 0; i < features.length; i++) {
@@ -377,8 +397,6 @@ function compareValues(key, order = 'asc') {
       var details = listing.appendChild(document.createElement('div'));
       details.innerHTML = prop.address+', '+prop.city+ ', '+ prop.state+ ", "+ prop.zip_code;
      
-
-
 
       link.addEventListener('click', function(e){
         // Update the currentFeature to the store associated with the clicked link
@@ -403,6 +421,7 @@ function compareValues(key, order = 'asc') {
     }
     
   }
+  
 
 
     </script>
