@@ -254,7 +254,7 @@ function createMap(data){
 
   ///-------function called when zomming or panning      
         map.on('moveend', function() {
-            if (map.getZoom()>7.5){
+            if (map.getZoom()>8.5){
                 map.setLayoutProperty('breweries_layer', "icon-allow-overlap", true);
             }else{
                 map.setLayoutProperty('breweries_layer', "icon-allow-overlap", false);
