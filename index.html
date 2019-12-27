@@ -370,7 +370,8 @@ function compareValues(key, order = 'asc') {
 
   function buildLocationList(features) {
     var options = {
-      keys:['properties.company','properties.address', 'properties.city']
+      keys:['properties.company','properties.address', 'properties.city'],
+      threshold: 0.3
     }
     var fuse = new Fuse(features, options);
     if (document.getElementById('search').value != ''){
