@@ -251,37 +251,21 @@ function createMap(data){
             
         });
         buildLocationList(geojson.features.sort(compareValues('company')));
-        //console.log(map.getSource('composite').vectorLayerIds)
-    /*     breweries.forEach(function(feature){
-            console.log(feature);
-            lats.push(parseFloat(feature.geometry.coordinates[1]));
-            longs.push(parseFloat(feature.geometry.coordinates[0]));
-        });
-        var maxLat = Math.max.apply(null,lats);
-        var maxLon = Math.max.apply(null,longs);
-        var minLat = Math.min.apply(null,lats);
-        var minLon = Math.min.apply(null,longs);
-        console.log(maxLat);
-        var bounds = new mapboxgl.LngLatBounds([[minLon, minLat],[maxLon, maxLat]]);
 
-        map.fitBounds(bounds);   */
-        
+  ///-------function called when zomming or panning      
         map.on('moveend', function() {
-            if (map.getZoom()>6){
+            if (map.getZoom()>7.5){
                 map.setLayoutProperty('breweries_layer', "icon-allow-overlap", true);
             }else{
                 map.setLayoutProperty('breweries_layer', "icon-allow-overlap", false);
             }
-            var features = map.queryRenderedFeatures({ layers: ['breweries_layer'] });
+            var features = getPointsInView(geojson.features);
             if (features) {
             //var uniqueFeatures = getUniqueFeatures(features, 'iata_code');
             // Populate features for the listing overlay.
             buildLocationList(features.sort(compareValues('company')));
             }
         });
-
-
-
     });
 }
     map.on('mouseenter', 'breweries_layer', () => {
@@ -334,8 +318,20 @@ function createMap(data){
             website)
           .addTo(map);
   }
-      //function to sort list alphabetically
+    
 
+//function to get points inside the field of view
+function getPointsInView(data){
+    viewBounds = map.getBounds();
+    let features_in_bounds=[];
+    for (i=0; i<data.length; i++){
+        if (data[i].geometry.coordinates[0]>viewBounds._sw.lng && data[i].geometry.coordinates[1]>viewBounds._sw.lat && data[i].geometry.coordinates[0]<viewBounds._ne.lng && data[i].geometry.coordinates[1]<viewBounds._ne.lat){
+            features_in_bounds.push(data[i]);
+        }
+    }
+    return features_in_bounds;
+}
+  //function to sort list alphabetically
 function compareValues(key, order = 'asc') {
     return function innerSort(a, b) {
         if (!a.properties.hasOwnProperty(key) || !b.properties.hasOwnProperty(key)) {
