@@ -76,7 +76,7 @@
         }
         .page_header{
             text-align: center; 
-            height:10%; 
+            height:8%; 
             top:0; left: 0; 
             width:100%; 
             background: linear-gradient(0deg, rgba(193,205,212,0.9335084375547094) 0%, rgba(255,255,255,1) 100%);
@@ -84,7 +84,7 @@
 
         .page_header h1{
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; 
-            font-size: 3vmax; color: rgb(15, 15, 15); 
+            font-size: 2.5vmax; color: rgb(15, 15, 15); 
             text-shadow: 2px 2px 2px #998f82;
         }
 
