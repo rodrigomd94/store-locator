@@ -39,6 +39,7 @@
 
   var feat=[];
   var timer; //variable used to store setTimeout() and then resetting it
+  var delay=0;
   map.on('load', function (e) {
 
     Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vRrZnllTiVGWFmzzvEXLxAt5boQZZh3krmLbwkTwYT6rmVB_b6ntjmaiI6E2RmsVgzMUFLYbAv5GTaA/pub?output=csv", 
@@ -231,8 +232,10 @@ function compareValues(key, order = 'asc') {
 }
 
   function buildLocationList(features) {
-    clearTimeout(timer)
+    
+    clearTimeout(timer);
       timer = setTimeout(()=>{
+        delay= 1850;
         var options = {
         keys:['properties.company','properties.address', 'properties.city'],
         threshold: 0.3,
@@ -289,5 +292,5 @@ function compareValues(key, order = 'asc') {
 
         });   
         }
-    }, 1800);
+    }, delay);
     }
