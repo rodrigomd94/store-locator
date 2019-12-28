@@ -10,14 +10,14 @@
       <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.1/mapbox-gl.css' rel='stylesheet' />
       <script src='https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.1.0/papaparse.min.js'></script>
       <script src='https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.4.6/fuse.min.js'></script>
-      <link href='spreadsheet.css' rel='stylesheet' />
+      <link href='stylesheet.css' rel='stylesheet' />
   </head>
 
   <body>
+    <div class='page_header' ><h1>The Beer For Me</h1></div>
     <div class='sidebar'>
-
       <div class='heading'>
-        <h1 >The Beer For Me</h1>
+        <h1 >Find a brewerie</h1>
       </div>
       <div id='listings' class='listings'></div>
     </div>
@@ -26,7 +26,7 @@
       <b>Twitter:</b> @thebeerforme
     </div>
     <div id='map' class='map'>
-      <div style="position: absolute; z-index:100">
+      <div style="position: absolute; z-index:100; margin-top: 5px">
         <input type="text" id="search" style="width: 14vw" placeholder="Search..">
         <button type="button"  id="search_button">Search</button>
       </div>
