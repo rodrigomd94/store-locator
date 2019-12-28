@@ -77,7 +77,7 @@ function createMap(data){
             },
             'paint':{
               'circle-radius': 4.5,
-              'circle-color': '#da8689',
+              'circle-color': '#8d8741',
               'circle-stroke-width':0.3
               
             },
@@ -94,8 +94,8 @@ function createMap(data){
             },
           'layout': {
           'text-field': ['get', 'company'],
-          'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
-          'text-radial-offset': 0.5,
+          'text-variable-anchor': ['bottom', 'top'],
+          'text-radial-offset': 0,
           'text-justify': 'auto',
           'text-size': 11,          
           },
@@ -110,10 +110,10 @@ function createMap(data){
 
   //-----------function called when click search button
         document.getElementById('search').addEventListener('change', (e)=>{
-          buildLocationList(map.queryRenderedFeatures({layers: ['breweries_layer']}));
+          buildLocationList(getPointsInView(geojson.features));
         });
         document.getElementById('search_button').addEventListener('click', (e)=>{
-          buildLocationList(map.queryRenderedFeatures({layers: ['breweries_layer']}));
+          buildLocationList(getPointsInView(geojson.features));
         })
   ///-------function called when zomming or panning      
         map.on('moveend', function() {
@@ -122,7 +122,7 @@ function createMap(data){
             }else{
                 map.setLayoutProperty('breweries_layer', "icon-allow-overlap", false);
             } */
-            //var features = getPointsInView(geojson.features);
+            
 
       //------------------show or hide labels based on zoom
             if (map.getZoom()>12){
@@ -130,7 +130,8 @@ function createMap(data){
             }else{
               map.setLayoutProperty('breweries_labels', 'visibility', 'none');
             } 
-            var features = map.queryRenderedFeatures({layers: ['breweries_layer']});
+            var features = getPointsInView(geojson.features);
+            //var features = map.queryRenderedFeatures({layers: ['breweries_layer']});
             if (features) {
             //var uniqueFeatures = getUniqueFeatures(features, 'iata_code');
             // Populate features for the listing overlay.
