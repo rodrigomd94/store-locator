@@ -279,35 +279,67 @@ function createMap(data){
         }); */
         map.addLayer({
             'id': 'breweries_layer',
-            'type': 'symbol',
+            'type': 'circle',
             'source': {
                 'type': 'geojson',
                 'data': geojson
             },
-            'layout': {
-                'icon-image': 'beer-15',
-                'icon-size': 0.7,
-                "icon-allow-overlap": false
-                }
+            'paint':{
+              'circle-radius': 4.5,
+              'circle-color': '#E7717D',
+              'circle-stroke-width':0.3
+              
+            },
+            "icon-allow-overlap": true
             
         });
+
+        map.addLayer({
+        'id': 'breweries_labels',
+        'type': 'symbol',
+        'source': {
+                'type': 'geojson',
+                'data': geojson
+            },
+          'layout': {
+          'text-field': ['get', 'company'],
+          'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+          'text-radial-offset': 0.5,
+          'text-justify': 'auto',
+          'text-size': 11,          
+          },
+          'paint':{
+            'text-color':'#8a8888',
+            'text-halo-width':0.4,
+            'text-halo-color': '#8a0123'
+          }
+        });
+        map.setLayoutProperty('breweries_labels', 'visibility', 'none');
         buildLocationList(geojson.features.sort(compareValues('company')));
 
   //-----------function called when click search button
         document.getElementById('search').addEventListener('change', (e)=>{
-          buildLocationList(getPointsInView(geojson.features));
+          buildLocationList(map.queryRenderedFeatures('breweries_layer'));
         });
         document.getElementById('search_button').addEventListener('click', (e)=>{
-          buildLocationList(getPointsInView(geojson.features));
+          buildLocationList(map.queryRenderedFeatures('breweries_layer'));
         })
   ///-------function called when zomming or panning      
         map.on('moveend', function() {
-            if (map.getZoom()>8.5){
+            /* if (map.getZoom()>8.5){
                 map.setLayoutProperty('breweries_layer', "icon-allow-overlap", true);
             }else{
                 map.setLayoutProperty('breweries_layer', "icon-allow-overlap", false);
-            }
-            var features = getPointsInView(geojson.features);
+            } */
+            //var features = getPointsInView(geojson.features);
+
+      //------------------show or hide labels based on zoom
+            if (map.getZoom()>12){
+                map.setLayoutProperty('breweries_labels', 'visibility', 'visible');
+            }else{
+              map.setLayoutProperty('breweries_labels', 'visibility', 'none');
+            } 
+            var features = map.queryRenderedFeatures('breweries_layer');
             if (features) {
             //var uniqueFeatures = getUniqueFeatures(features, 'iata_code');
             // Populate features for the listing overlay.
@@ -347,7 +379,7 @@ function createMap(data){
   function flyToStore(currentFeature) {
     map.flyTo({
         center: currentFeature.geometry.coordinates,
-        zoom: 12
+        zoom: 13
       });
   }
 
