@@ -238,6 +238,11 @@
     enableHighAccuracy: true
     },
     trackUserLocation: true
+    }).on('geolocate', (e)=>{
+      map.flyTo({
+        center: [e.coords.longitude, e.coords.latitude],
+        zoom: 11
+      });
     })
   );
 
