@@ -38,6 +38,7 @@
   );
 
   var feat=[];
+  var timer; //variable used to store setTimeout() and then resetting it
   map.on('load', function (e) {
 
     Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vRrZnllTiVGWFmzzvEXLxAt5boQZZh3krmLbwkTwYT6rmVB_b6ntjmaiI6E2RmsVgzMUFLYbAv5GTaA/pub?output=csv", 
@@ -230,61 +231,63 @@ function compareValues(key, order = 'asc') {
 }
 
   function buildLocationList(features) {
-    var options = {
-      keys:['properties.company','properties.address', 'properties.city'],
-      threshold: 0.3,
-    }
-    var fuse = new Fuse(features, options);
-    if (document.getElementById('search').value != ''){
-      features = fuse.search(document.getElementById('search').value).sort(compareValues('company'));
-    }
-
-    var listings = document.getElementById('listings');
-    listings.innerHTML='';
-    for (i = 0; i < features.length; i++) {
-      var currentFeature = features[i];
-      var prop = currentFeature.properties;
-
-      
-      var listing = listings.appendChild(document.createElement('div'));
-      listing.className = 'item';
-      listing.id = "listing-" + i;
-
-      var link = listing.appendChild(document.createElement('a'));
-      link.href = '#';
-      link.className = 'title';
-      link.dataPosition = i;
-      link.innerHTML = prop.company;
-
-      if(prop.website != '' && prop.website !=null){
-        var site = '</br><a href="https://'+currentFeature.properties.website+'" target="_blank">Website</a>'
-      }else{
-        var site = '';
-      }
-
-      var details = listing.appendChild(document.createElement('div'));
-      details.innerHTML = prop.address+', '+prop.city+ ', '+ prop.state+ ", "+ prop.zip_code+site;
-     
-      
-      link.addEventListener('click', function(e){
-        // Update the currentFeature to the store associated with the clicked link
-        var clickedListing = features[this.dataPosition];
-
-        // 1. Fly to the point
-        flyToStore(clickedListing);
-
-        // 2. Close all other popups and display popup for clicked store
-        createPopUp(clickedListing);
-
-        // 3. Highlight listing in sidebar (and remove highlight for all other listings)
-        var activeItem = document.getElementsByClassName('active');
-
-        if (activeItem[0]) {
-           activeItem[0].classList.remove('active');
+    clearTimeout(timer)
+      timer = setTimeout(()=>{
+        var options = {
+        keys:['properties.company','properties.address', 'properties.city'],
+        threshold: 0.3,
         }
-        this.parentNode.classList.add('active');
+        var fuse = new Fuse(features, options);
+        if (document.getElementById('search').value != ''){
+        features = fuse.search(document.getElementById('search').value).sort(compareValues('company'));
+        }
 
-      });   
+        var listings = document.getElementById('listings');
+        listings.innerHTML='';
+        for (i = 0; i < features.length; i++) {
+        var currentFeature = features[i];
+        var prop = currentFeature.properties;
+
+        
+        var listing = listings.appendChild(document.createElement('div'));
+        listing.className = 'item';
+        listing.id = "listing-" + i;
+
+        var link = listing.appendChild(document.createElement('a'));
+        link.href = '#';
+        link.className = 'title';
+        link.dataPosition = i;
+        link.innerHTML = prop.company;
+
+        if(prop.website != '' && prop.website !=null){
+            var site = '</br><a href="https://'+currentFeature.properties.website+'" target="_blank">Website</a>'
+        }else{
+            var site = '';
+        }
+
+        var details = listing.appendChild(document.createElement('div'));
+        details.innerHTML = prop.address+', '+prop.city+ ', '+ prop.state+ ", "+ prop.zip_code+site;
+        
+        
+        link.addEventListener('click', function(e){
+            // Update the currentFeature to the store associated with the clicked link
+            var clickedListing = features[this.dataPosition];
+
+            // 1. Fly to the point
+            flyToStore(clickedListing);
+
+            // 2. Close all other popups and display popup for clicked store
+            createPopUp(clickedListing);
+
+            // 3. Highlight listing in sidebar (and remove highlight for all other listings)
+            var activeItem = document.getElementsByClassName('active');
+
+            if (activeItem[0]) {
+            activeItem[0].classList.remove('active');
+            }
+            this.parentNode.classList.add('active');
+
+        });   
+        }
+    }, 1800);
     }
-  }
-  
