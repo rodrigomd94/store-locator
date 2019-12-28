@@ -247,16 +247,17 @@
   );
 
   var feat=[];
+  map.on('load', function (e) {
 
-  Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vRrZnllTiVGWFmzzvEXLxAt5boQZZh3krmLbwkTwYT6rmVB_b6ntjmaiI6E2RmsVgzMUFLYbAv5GTaA/pub?output=csv", 
-    {download: true,
-    header: true,
-    complete: function(results) {
-            var data = results;
-            createMap(data.data);
-        }
-    });
-
+    Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vRrZnllTiVGWFmzzvEXLxAt5boQZZh3krmLbwkTwYT6rmVB_b6ntjmaiI6E2RmsVgzMUFLYbAv5GTaA/pub?output=csv", 
+      {download: true,
+      header: true,
+      complete: function(results) {
+              var data = results;
+              createMap(data.data);
+          }
+      });
+  });
 function createMap(data){
     //save string of features for geojson
     for (i=0; i<data.length; i++){
@@ -269,7 +270,6 @@ function createMap(data){
     };
     //console.log(geojson);
     // This adds the data to the map
-    map.on('load', function (e) {
         var lats = [];
         var longs = [];
         
@@ -346,7 +346,6 @@ function createMap(data){
             buildLocationList(features.sort(compareValues('company')));
             }
         });
-    });
 
    
 }
