@@ -319,10 +319,10 @@ function createMap(data){
 
   //-----------function called when click search button
         document.getElementById('search').addEventListener('change', (e)=>{
-          buildLocationList(map.queryRenderedFeatures('breweries_layer'));
+          buildLocationList(map.queryRenderedFeatures({layers: ['breweries_layer']}));
         });
         document.getElementById('search_button').addEventListener('click', (e)=>{
-          buildLocationList(map.queryRenderedFeatures('breweries_layer'));
+          buildLocationList(map.queryRenderedFeatures({layers: ['breweries_layer']}));
         })
   ///-------function called when zomming or panning      
         map.on('moveend', function() {
@@ -339,7 +339,7 @@ function createMap(data){
             }else{
               map.setLayoutProperty('breweries_labels', 'visibility', 'none');
             } 
-            var features = map.queryRenderedFeatures('breweries_layer');
+            var features = map.queryRenderedFeatures({layers: ['breweries_layer']});
             if (features) {
             //var uniqueFeatures = getUniqueFeatures(features, 'iata_code');
             // Populate features for the listing overlay.
